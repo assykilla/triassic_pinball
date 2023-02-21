@@ -17,13 +17,21 @@ using namespace std;
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "fonts.h"
+#include "abotello.h"
 //some structures
 
 class Global {
     public:
 	int xres, yres;
 	int n;
-	Global();
+	unsigned int pause;
+	Global(){
+	    xres = 650;
+	    yres = 450;
+	    n = 0;
+	    pause = 0;
+
+	}
 } g;
 extern int alex_feature;
 extern void stringtext(string *text);
@@ -121,13 +129,6 @@ int main()
     }
     cleanup_fonts();
     return 0;
-}
-
-Global::Global()
-{
-    xres = 650;
-    yres = 450;
-    n = 0;
 }
 
 X11_wrapper::~X11_wrapper()
@@ -230,13 +231,13 @@ void make_particle(int x, int y)
 {
     if ( g.n < MAX_PARTICLES) {
 	for (int j = 0; j < 5; j++) {
-		if (y <= box[j].pos[1]+box[j].h && 
-			x >= box[j].pos[0]-box[j].w &&
-			x <= box[j].pos[0]+box[j].w &&
-			y >= box[j].pos[1]-box[j].h) {
-	    		return;	    
-		}
-    	}
+	    if (y <= box[j].pos[1]+box[j].h && 
+		    x >= box[j].pos[0]-box[j].w &&
+		    x <= box[j].pos[0]+box[j].w &&
+		    y >= box[j].pos[1]-box[j].h) {
+		return;	    
+	    }
+	}
 	particle[g.n].w=4;
 	particle[g.n].h=4;
 	particle[g.n].pos[0] = x;
@@ -244,7 +245,7 @@ void make_particle(int x, int y)
 	particle[g.n].vel[0] = rnd() * 0.2 - 0.1;
 	particle[g.n].vel[1] = rnd() * 0.2 - 0.1;
 	++g.n;
-	
+
     }
 }
 
@@ -310,19 +311,19 @@ int X11_wrapper::check_keys(XEvent *e)
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
 	switch (key) {
-	    case XK_1:
-		//Key 1 was pressed
+	    case XK_p:
+		g.pause = manage_pstate(g.pause);
 		break;
-        case XK_2:
-            if (XK_Shift_L)
-                // Key 2 and shift are both pressed down
-            {
-                if (alex_feature == 0)
-                    alex_feature = 1;
-                else 
-                    alex_feature = 0;
-            }
-        break;
+	    case XK_2:
+		if (XK_Shift_L)
+		    // Key 2 and shift are both pressed down
+		{
+		    if (alex_feature == 0)
+			alex_feature = 1;
+		    else 
+			alex_feature = 0;
+		}
+		break;
 	    case XK_Escape:
 		//Escape key was pressed
 		return 1;
@@ -354,7 +355,7 @@ float Gravity = 0.05;
 
 void physics()
 {
-
+    if(!g.pause){	
     for (int i = 0; i < g.n; i++) {
 	particle[i].pos[0] += particle[i].vel[0];
 	particle[i].pos[1] += particle[i].vel[1];
@@ -367,8 +368,8 @@ void physics()
 	    // optimized
 	    particle[i] = particle [--g.n];
 	}
-	
-	
+
+
 
 	//check for collision between particles and boxes
 	for (int j = 0; j < 5; j++) {
@@ -397,6 +398,7 @@ void physics()
 	    }
 	}
     }
+    }
 }
 void render()
 {
@@ -410,21 +412,21 @@ void render()
     string temp1[5] = {"Requirements", "Design", "Coding", "Testing", "Maintenance" }; 
     string temp2[5] = {"Xander's", "Epic", "Minecraft", "Feature", "Mode"};
     if (alex_feature == 0)
-        stringtext(temp1);
+	stringtext(temp1);
     else
-        stringtext(temp2);
+	stringtext(temp2);
     //string waterfall[5];
-    
+
     /*for (int i = 0; i < 5; i++) {
-        if (alex_feature == 0)
-            waterfall[i] = temp1[i];
-        else 
-            waterfall[i] = temp2[i];
-    }
-*/
-    
-    
-   
+      if (alex_feature == 0)
+      waterfall[i] = temp1[i];
+      else 
+      waterfall[i] = temp2[i];
+      }
+      */
+
+
+
     char text[100];
     glClear(GL_COLOR_BUFFER_BIT);
     //Draw box.
@@ -477,6 +479,12 @@ void render()
 	angle += inc;
     }
     glEnd();
+    if (g.pause){
+	r[6].bot = g.yres/1.5;
+	r[6].left = g.xres/2;
+	r[6].center = 0;
+	ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
+    }
 
 }
 
