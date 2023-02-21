@@ -1,4 +1,4 @@
-//modified by Xander Reyes:
+//modified by Xander Reyes, Andres Botello
 //date:
 //
 //author: Gordon Griesel
