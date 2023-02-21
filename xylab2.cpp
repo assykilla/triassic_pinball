@@ -1,4 +1,4 @@
-//modified by Xander Reyes, Andres Botello, Issa Samara
+//modified by Xander Reyes, Andres Botello
 //date:
 //
 //author: Gordon Griesel
@@ -25,7 +25,8 @@ class Global {
 	int n;
 	Global();
 } g;
-
+extern int alex_feature;
+extern void stringtext(string *text);
 const int MAX_PARTICLES = 5000;
 class Box {
     public:
@@ -312,6 +313,16 @@ int X11_wrapper::check_keys(XEvent *e)
 	    case XK_1:
 		//Key 1 was pressed
 		break;
+        case XK_2:
+            if (XK_Shift_L)
+                // Key 2 and shift are both pressed down
+            {
+                if (alex_feature == 0)
+                    alex_feature = 1;
+                else 
+                    alex_feature = 0;
+            }
+        break;
 	    case XK_Escape:
 		//Escape key was pressed
 		return 1;
@@ -394,7 +405,26 @@ void render()
     float positionx = box[0].pos[0];
     float positiony = box[0].pos[1];
     Rect r[5];
-    string waterfall[5] = {"Requirements", "Design", "Coding", "Testing", "Maintenance" };
+    extern string waterfall[5];
+    //string waterfall[5]; //= textfunc(screentext,5 alex_feature);
+    string temp1[5] = {"Requirements", "Design", "Coding", "Testing", "Maintenance" }; 
+    string temp2[5] = {"Xander's", "Epic", "Minecraft", "Feature", "Mode"};
+    if (alex_feature == 0)
+        stringtext(temp1);
+    else
+        stringtext(temp2);
+    //string waterfall[5];
+    
+    /*for (int i = 0; i < 5; i++) {
+        if (alex_feature == 0)
+            waterfall[i] = temp1[i];
+        else 
+            waterfall[i] = temp2[i];
+    }
+*/
+    
+    
+   
     char text[100];
     glClear(GL_COLOR_BUFFER_BIT);
     //Draw box.
