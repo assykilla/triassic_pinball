@@ -392,11 +392,11 @@ void physics()
 	dist = sqrt((xd*xd)+(yd*yd));
 	if (dist <= circle.r) {
 	    if (particle[i].pos[0] < circle.c[0]) {
-		particle[i].vel[1] =  -particle[i].vel[1] * 0.03; 
-		particle[i].vel[0] = -dist * 0.02 ; 
+		    particle[i].vel[1] =  -particle[i].vel[1] * 0.03; 
+		    particle[i].vel[0] = -dist * 0.02 ; 
 	    } else {
-		particle[i].vel[1] =  -particle[i].vel[1] * 0.03; 
-		particle[i].vel[0] = dist * 0.02 ; 
+		    particle[i].vel[1] =  -particle[i].vel[1] * 0.03; 
+		    particle[i].vel[0] = dist * 0.02 ; 
 	    }
 	}
     }
@@ -408,26 +408,16 @@ void render()
 
     float positionx = box[0].pos[0];
     float positiony = box[0].pos[1];
-    Rect r[5];
+    Rect r[7];
+    
     extern string waterfall[5];
-    //string waterfall[5]; //= textfunc(screentext,5 alex_feature);
     string temp1[5] = {"Requirements", "Design", "Coding", "Testing", "Maintenance" }; 
     string temp2[5] = {"Xander's", "Epic", "Minecraft", "Feature", "Mode"};
     if (alex_feature == 0)
-	stringtext(temp1);
+	    stringtext(temp1);
     else
-	stringtext(temp2);
-    //string waterfall[5];
-
-    /*for (int i = 0; i < 5; i++) {
-      if (alex_feature == 0)
-      waterfall[i] = temp1[i];
-      else 
-      waterfall[i] = temp2[i];
-      }
-      */
-
-
+	    stringtext(temp2);
+    
 
     char text[100];
     glClear(GL_COLOR_BUFFER_BIT);
@@ -452,6 +442,7 @@ void render()
 	ggprint8b(&r[i], 16, 0x00fffff0, text);
 	positionx = positionx + 92;
 	positiony = positiony - 45;
+    
     }
     //Draw particle.
     for (int i = 0; i < g.n; i++) {
@@ -465,9 +456,11 @@ void render()
 	glVertex2f( particle[i].w, -particle[i].h);
 	glEnd();
 	glPopMatrix();
+    
     }
     default_make_particle(); // default way of making particles. 
-			     //Draw Circle
+    
+    //Draw Circle
     int n = 20; 
     double angle = 0.0;
     double inc = (2.0*3.14)/n;
@@ -481,12 +474,18 @@ void render()
 	angle += inc;
     }
     glEnd();
+
     if (g.pause){
-	r[6].bot = g.yres/1.5;
-	r[6].left = g.xres/2;
-	r[6].center = 0;
-	ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
+	    r[6].bot = g.yres/1.5;
+	    r[6].left = g.xres/2;
+	    r[6].center = 0;
+	    ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
     }
+
+	r[7].bot = g.yres-35;
+	r[7].left = g.xres/2;
+	r[7].center = -5;
+	ggprint8b(&r[7], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
 
 }
 
