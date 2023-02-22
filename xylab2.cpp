@@ -293,6 +293,7 @@ void X11_wrapper::check_mouse(XEvent *e)
     if (e->type == MotionNotify) {
 	//The mouse moved!
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
+	    if (!g.pause){
 	    savex = e->xbutton.x;
 	    savey = e->xbutton.y;
 	    //Code placed here will execute whenever the mouse moves.
@@ -300,6 +301,7 @@ void X11_wrapper::check_mouse(XEvent *e)
 		make_particle(e->xbutton.x, g.yres - e->xbutton.y);
 	    }
 
+	}
 	}
     }
 }
