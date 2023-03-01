@@ -68,7 +68,7 @@ class Box {
 
 class Circle {
     public:
-	float r, c[2], x, y;
+	float r, c[2], x, y, vel[2];
 	unsigned char color[3];
 	void set_color ( unsigned char col[3]) {
 	    memcpy(color, col, sizeof(unsigned char) *3);
@@ -76,9 +76,19 @@ class Circle {
 	}
 	Circle(){
 	    r = 75.0f;
-	    c[0] = 600;
-	    c[1] = 25;
+	    c[0] = 600.0f;
+	    c[1] = 25.0f;
+	    vel[0] = 0.0f;
+	    vel[1] = 0.0f;
 	}
+	Circle(float radius, int cx,int cy, float v0, float v1) {
+	    r = radius;
+	    c[0] = cx;
+	    c[1] = cy;
+	    vel[0] = v0;
+	    vel[1] = v1;
+	}
+
 } circle;
 
 class X11_wrapper {
@@ -99,7 +109,7 @@ class X11_wrapper {
 	int check_keys(XEvent *e);
 } x11;
 
-//Function prototypes
+//FunctiCircle(float wid, float hgt, int x, int y, float v0, float v1){
 void init_opengl(void);
 void physics(void);
 void render(void);
@@ -221,6 +231,7 @@ void X11_wrapper::check_resize(XEvent *e)
     }
 }
 //-----------------------------------------------------------------------------
+
 float rnd()
 {
     float r = ((float)rand() / (float)RAND_MAX);
@@ -421,7 +432,7 @@ void render()
 
     char text[100];
     glClear(GL_COLOR_BUFFER_BIT);
-    //Draw box.
+    //Draw boxes.
     for (int i = 0; i < 5; i++) {
 	glPushMatrix();
 	glColor3ubv(box[i].color);
@@ -444,6 +455,21 @@ void render()
 	positiony = positiony - 45;
     
     }
+
+
+    	// Draw Box	
+	Box highbox = Box(10.0f,325.0f, 550, 10, 0.0f, 0.0f);
+	glPushMatrix();
+	glColor3ub(255,100,255);
+	glTranslatef(highbox.pos[0], highbox.pos[1], 0.0f);
+	glBegin(GL_QUADS);
+	glVertex2f(-highbox.w, -highbox.h);
+	glVertex2f(-highbox.w,  highbox.h);
+	glVertex2f( highbox.w,  highbox.h);
+	glVertex2f( highbox.w, -highbox.h);
+	glEnd();
+	glPopMatrix();
+
     //Draw particle.
     for (int i = 0; i < g.n; i++) {
 	glPushMatrix();
@@ -471,6 +497,21 @@ void render()
 	circle.x = circle.r*cos(angle);
 	circle.y = circle.r*sin(angle);
 	glVertex2f(circle.x+circle.c[0],circle.y + circle.c[1]);
+	angle += inc;
+    }
+    glEnd();
+	
+    Circle halfcir = Circle(50.0f, 510 ,335, 0.0f, 0.0f);
+     n = 32; 
+     angle = 0.0;
+     inc = (2.0*3.14)/n;
+    //glVertex2f(x, y);
+    glColor3ub(255,100, 255);
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n/2+1; i++) {
+	halfcir.x = halfcir.r*cos(angle);
+	halfcir.y = halfcir.r*sin(angle);
+	glVertex2f(halfcir.x+halfcir.c[0],halfcir.y + halfcir.c[1]);
 	angle += inc;
     }
     glEnd();
