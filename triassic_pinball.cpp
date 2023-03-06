@@ -18,6 +18,7 @@ using namespace std;
 #include <GL/glx.h>
 #include "fonts.h"
 #include "abotello.h"
+#include "isamara.h"
 //some structures
 
 class Global {
@@ -25,11 +26,13 @@ class Global {
 	int xres, yres;
 	int n;
 	unsigned int pause;
+    unsigned int mainmenu;
 	Global(){
 	    xres = 650;
 	    yres = 450;
 	    n = 0;
 	    pause = 0;
+        mainmenu = 0;
 
 	}
 } g;
@@ -64,7 +67,7 @@ class Box {
 	    vel[0] = v0;
 	    vel[1] = v1;
 	}
-} box[5], particle[MAX_PARTICLES];
+} box[5], particle[MAX_PARTICLES]; 
 
 class Circle {
     public:
@@ -121,7 +124,7 @@ void render(void);
 //=====================================
 int main()
 {
-    init_opengl();
+    init_opengl(); 
     //Main loop
     int done = 0;
     while (!done) {
@@ -291,9 +294,12 @@ void X11_wrapper::check_mouse(XEvent *e)
     }
     if (e->type == ButtonPress) {
 	if (e->xbutton.button==1) {
+        if (g.mainmenu == 0) {
+            g.mainmenu = select_option(e->xbutton.x, g.yres - e->xbutton.y);
+        }
 	    //Left button was pressed.
 	    //int y = g.yres - e->xbutton.y;
-	    make_particle(e->xbutton.x, g.yres - e->xbutton.y);
+	    //make_particle(e->xbutton.x, g.yres - e->xbutton.y);
 	    return;
 	}
 	if (e->xbutton.button==3) {
@@ -337,6 +343,12 @@ int X11_wrapper::check_keys(XEvent *e)
 			alex_feature = 0;
 		}
 		break;
+        case XK_e:
+            if (XK_Shift_L && g.mainmenu != 0)
+                g.mainmenu = 0;
+        break;
+
+
 	    case XK_Escape:
 		//Escape key was pressed
 		return 1;
@@ -416,6 +428,16 @@ void physics()
 void render()
 {
     //
+    if (g.mainmenu == 0) {
+        prompt titlescreen[4];
+        Rect titleprompt[5];
+        glClear(GL_COLOR_BUFFER_BIT);
+        for (int i=0; i<4; i++) {
+            render_menu(titlescreen[i], titleprompt[i], i, g.xres, g.yres);
+        }
+        render_title(titleprompt[5],g.xres,g.yres);
+        return;
+    }
 
     float positionx = box[0].pos[0];
     float positiony = box[0].pos[1];
