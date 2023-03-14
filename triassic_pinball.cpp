@@ -306,6 +306,18 @@ int X11_wrapper::check_keys(XEvent *e)
 		if (XK_G) {
 			georgeFeatureToggle - !georgeFeatureToggle;
 		}
+		if (XK_uparrow) {
+			ball.hgt += .005;
+		}
+		if (XK_downarrow) {
+			ball.hgt -= .005;
+		}
+		if (XK_leftarrow) {
+			ball.wid -= .005;
+		}
+		if (XK_rightarrow) {
+			ball.wid += .005;
+		}
 		break;
 	    case XK_space:
 		velocity[1] = 1.0f;
@@ -510,6 +522,7 @@ void render()
 
 	if (georgeFeatureToggle = 1) {
 		georgeFeature;
+		ggprint8b(&r[6], 20, 0x0034a4eb, "George's Feature");
 	}
 
 }
