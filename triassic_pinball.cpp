@@ -37,8 +37,8 @@ class Global {
 	}
 } g;
 extern int alex_feature;
+extern float velocity[2];
 extern void stringtext(string *text);
-const int MAX_PARTICLES = 5000;
 class Box {
     public:
 	float w;
@@ -67,7 +67,7 @@ class Box {
 	    vel[0] = v0;
 	    vel[1] = v1;
 	}
-} box[5], particle[MAX_PARTICLES]; 
+}ball; 
 
 class Circle {
     public:
@@ -78,7 +78,7 @@ class Circle {
 
 	}
 	Circle(){
-	    r = 75.0f;
+	    r = 70.0f;
 	    c[0] = 600.0f;
 	    c[1] = 25.0f;
 	    vel[0] = 0.0f;
@@ -164,9 +164,7 @@ X11_wrapper::X11_wrapper()
     if (vi == NULL) {
 	cout << "\n\tno appropriate visual found\n" << endl;
 	exit(EXIT_FAILURE);
-    }  glPushMatrix();
-    glColor3ub(255,255, 100);
-
+    }  
     Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
     XSetWindowAttributes swa;
     swa.colormap = cmap;
@@ -241,41 +239,6 @@ float rnd()
     return r;
 }
 
-void make_particle(int x, int y)
-{
-    if ( g.n < MAX_PARTICLES) {
-	for (int j = 0; j < 5; j++) {
-	    if (y <= box[j].pos[1]+box[j].h && 
-		    x >= box[j].pos[0]-box[j].w &&
-		    x <= box[j].pos[0]+box[j].w &&
-		    y >= box[j].pos[1]-box[j].h) {
-		return;	    
-	    }
-	}
-	particle[g.n].w=4;
-	particle[g.n].h=4;
-	particle[g.n].pos[0] = x;
-	particle[g.n].pos[1] = y;
-	particle[g.n].vel[0] = rnd() * 0.2 - 0.1;
-	particle[g.n].vel[1] = rnd() * 0.2 - 0.1;
-	++g.n;
-
-    }
-}
-
-void default_make_particle()
-{
-    if ( g.n < MAX_PARTICLES) {
-	particle[g.n].w=4;
-	particle[g.n].h=4;
-	particle[g.n].pos[0] = 50;
-	particle[g.n].pos[1] = 390;
-	particle[g.n].vel[0] = rnd() * 0.2 - 0.1;
-	particle[g.n].vel[1] = rnd() * 0.2 - 0.1;
-	++g.n;
-    }
-}
-
 void X11_wrapper::check_mouse(XEvent *e)
 {
     static int savex = 0;
@@ -314,11 +277,7 @@ void X11_wrapper::check_mouse(XEvent *e)
 	    savex = e->xbutton.x;
 	    savey = e->xbutton.y;
 	    //Code placed here will execute whenever the mouse moves.
-	    for (int i = 0; i < 5; i++) {	
-		make_particle(e->xbutton.x, g.yres - e->xbutton.y);
-	    }
-
-	}
+		}
 	}
     }
 }
@@ -343,12 +302,14 @@ int X11_wrapper::check_keys(XEvent *e)
 			alex_feature = 0;
 		}
 		break;
-        case XK_e:
-            if (XK_Shift_L && g.mainmenu != 0)
+	    case XK_space:
+		velocity[1] = 1.0f;
+		ball.vel[1] = velocity[1];
+		break;
+            case XK_e:
+            	if (XK_Shift_L && g.mainmenu != 0)
                 g.mainmenu = 0;
-        break;
-
-
+            break;
 	    case XK_Escape:
 		//Escape key was pressed
 		return 1;
@@ -367,21 +328,23 @@ void init_opengl(void)
     //Set 2D mode (no perspective)
     glOrtho(0, g.xres, 0, g.yres, -1, 1);
     //Set the screen background color
-    glClearColor(0.1, 0.1, 0.1, 1.0);
+    glClearColor(1.0, 0.5, 0.2, 1.0);
     glEnable(GL_TEXTURE_2D);
     initialize_fonts();
     //set box color
     unsigned char c[3] = {25,200,25};
-    for (int i=0; i < 5; i++) {
-	box[i].set_color(c);
-    }
+    
 }
 float Gravity = 0.05;
 
 void physics()
 {
     if(!g.pause){	
-    for (int i = 0; i < g.n; i++) {
+	ball.pos[0] += ball.vel[0];
+	ball.pos[1] += ball.vel[1];
+	ball.vel[1] -= Gravity;
+
+    /*for (int i = 0; i < g.n; i++) {
 	particle[i].pos[0] += particle[i].vel[0];
 	particle[i].pos[1] += particle[i].vel[1];
 	particle[i].vel[1] -= Gravity;
@@ -393,11 +356,12 @@ void physics()
 	    // optimized
 	    particle[i] = particle [--g.n];
 	}
-
+	}
+*/
 
 
 	//check for collision between particles and boxes
-	for (int j = 0; j < 5; j++) {
+	/*for (int j = 0; j < 5; j++) {
 	    if (particle[i].pos[1] < box[j].pos[1]+box[j].h && 
 		    particle[i].pos[0] > box[j].pos[0]-box[j].w &&
 		    particle[i].pos[0] < box[j].pos[0]+box[j].w &&
@@ -421,8 +385,8 @@ void physics()
 		    particle[i].vel[1] =  -particle[i].vel[1] * 0.03; 
 		    particle[i].vel[0] = dist * 0.02 ; 
 	    }
-	}
-    }
+	
+    }*/
     }
 }
 void render()
@@ -439,9 +403,7 @@ void render()
         return;
     }
 
-    float positionx = box[0].pos[0];
-    float positiony = box[0].pos[1];
-    Rect r[7];
+        Rect r[7];
     
     extern string waterfall[5];
     string temp1[5] = {"Requirements", "Design", "Coding", "Testing", "Maintenance" }; 
@@ -454,30 +416,7 @@ void render()
 
     char text[100];
     glClear(GL_COLOR_BUFFER_BIT);
-    //Draw boxes.
-    for (int i = 0; i < 5; i++) {
-	glPushMatrix();
-	glColor3ubv(box[i].color);
-	box[i].pos[0] = positionx;
-	box[i].pos[1] = positiony;	
-	glTranslatef(box[i].pos[0], box[i].pos[1], 0.0f);
-	glBegin(GL_QUADS);
-	glVertex2f(-box[i].w, -box[i].h);
-	glVertex2f(-box[i].w,  box[i].h);
-	glVertex2f( box[i].w,  box[i].h);
-	glVertex2f( box[i].w, -box[i].h);
-	glEnd();
-	glPopMatrix();
-	r[i].bot = box[i].pos[1];
-	r[i].left = box[i].pos[0];
-	r[i].center = -5;
-	strcpy(text, waterfall[i].c_str());
-	ggprint8b(&r[i], 16, 0x00fffff0, text);
-	positionx = positionx + 92;
-	positiony = positiony - 45;
     
-    }
-
 
     	// Draw Box	
 	Box highbox = Box(10.0f,325.0f, 550, 10, 0.0f, 0.0f);
@@ -491,9 +430,22 @@ void render()
 	glVertex2f( highbox.w, -highbox.h);
 	glEnd();
 	glPopMatrix();
+	
+	ball = Box(5.0f,5.0f, 570, 100, velocity[0], velocity[1]);
+	glPushMatrix();
+	glColor3ub(0,0,0);
+	glTranslatef(ball.pos[0], ball.pos[1], 0.0f);
+	glBegin(GL_QUADS);
+	glVertex2f(-ball.w, -ball.h);
+	glVertex2f(-ball.w,  ball.h);
+	glVertex2f( ball.w,  ball.h);
+	glVertex2f( ball.w, -ball.h);
+	glEnd();
+	glPopMatrix();
+
 
     //Draw particle.
-    for (int i = 0; i < g.n; i++) {
+    /*for (int i = 0; i < g.n; i++) {
 	glPushMatrix();
 	glColor3ub(150, 160, 255);
 	glTranslatef(particle[i].pos[0], particle[i].pos[1], 0.0f);
@@ -507,7 +459,8 @@ void render()
     
     }
     default_make_particle(); // default way of making particles. 
-    
+    */
+
     //Draw Circle
     int n = 20; 
     double angle = 0.0;
