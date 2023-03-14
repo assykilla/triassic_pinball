@@ -1,6 +1,2 @@
 //George Torres
 
-void georgeFeature()
-{
-    
-}
