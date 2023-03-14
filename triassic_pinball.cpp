@@ -26,19 +26,19 @@ class Global {
 	int xres, yres;
 	int n;
 	unsigned int pause;
-    unsigned int mainmenu;
+	unsigned int mainmenu;
 	Global(){
 	    xres = 650;
 	    yres = 450;
 	    n = 0;
 	    pause = 0;
-        mainmenu = 0;
+	    mainmenu = 0;
 
 	}
 } g;
 extern int alex_feature;
 extern float velocity[2];
-extern void stringtext(string *text);
+extern bool summonball;
 class Box {
     public:
 	float w;
@@ -67,7 +67,24 @@ class Box {
 	    vel[0] = v0;
 	    vel[1] = v1;
 	}
-}ball; 
+};
+
+class Triangle {
+    public:
+	float vertex1[2],vertex2[2],vertex3[2];
+	Triangle() {
+	}
+	Triangle(float vertx1, float vertx2, float vertx3,
+		float verty1, float verty2, float verty3) {
+	    vertex1[0] = vertx1;
+	    vertex2[0] = vertx2;
+	    vertex3[0] = vertx3;
+	    vertex1[1] = verty1;
+	    vertex2[1] = verty2;
+	    vertex3[1] = verty3;
+	}
+};
+
 
 class Circle {
     public:
@@ -257,9 +274,9 @@ void X11_wrapper::check_mouse(XEvent *e)
     }
     if (e->type == ButtonPress) {
 	if (e->xbutton.button==1) {
-        if (g.mainmenu == 0) {
-            g.mainmenu = select_option(e->xbutton.x, g.yres - e->xbutton.y);
-        }
+	    if (g.mainmenu == 0) {
+		g.mainmenu = select_option(e->xbutton.x, g.yres - e->xbutton.y);
+	    }
 	    //Left button was pressed.
 	    //int y = g.yres - e->xbutton.y;
 	    //make_particle(e->xbutton.x, g.yres - e->xbutton.y);
@@ -274,13 +291,15 @@ void X11_wrapper::check_mouse(XEvent *e)
 	//The mouse moved!
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
 	    if (!g.pause){
-	    savex = e->xbutton.x;
-	    savey = e->xbutton.y;
-	    //Code placed here will execute whenever the mouse moves.
-		}
+		savex = e->xbutton.x;
+		savey = e->xbutton.y;
+		//Code placed here will execute whenever the mouse moves.
+	    }
 	}
     }
 }
+
+Box ball = Box(5.0f,5.0f, 580, 100, velocity[0], velocity[1]);
 
 int X11_wrapper::check_keys(XEvent *e)
 {
@@ -303,13 +322,14 @@ int X11_wrapper::check_keys(XEvent *e)
 		}
 		break;
 	    case XK_space:
-		velocity[1] = 1.0f;
+		summonball = true;
+		velocity[1] = 8.0f;
 		ball.vel[1] = velocity[1];
 		break;
-            case XK_e:
-            	if (XK_Shift_L && g.mainmenu != 0)
-                g.mainmenu = 0;
-            break;
+	    case XK_e:
+		if (XK_Shift_L && g.mainmenu != 0)
+		    g.mainmenu = 0;
+		break;
 	    case XK_Escape:
 		//Escape key was pressed
 		return 1;
@@ -328,138 +348,162 @@ void init_opengl(void)
     //Set 2D mode (no perspective)
     glOrtho(0, g.xres, 0, g.yres, -1, 1);
     //Set the screen background color
-    glClearColor(1.0, 0.5, 0.2, 1.0);
+    glClearColor(0.2, 0.5, 0.2, 0.3);
     glEnable(GL_TEXTURE_2D);
     initialize_fonts();
-    //set box color
-    unsigned char c[3] = {25,200,25};
-    
+
 }
 float Gravity = 0.05;
 
 void physics()
 {
-    if(!g.pause){	
-	ball.pos[0] += ball.vel[0];
-	ball.pos[1] += ball.vel[1];
-	ball.vel[1] -= Gravity;
-
-    /*for (int i = 0; i < g.n; i++) {
-	particle[i].pos[0] += particle[i].vel[0];
-	particle[i].pos[1] += particle[i].vel[1];
-	particle[i].vel[1] -= Gravity;
+    if(!g.pause){
+	if (summonball) {	
+	    ball.pos[0] += ball.vel[0];
+	    ball.pos[1] += ball.vel[1];
+	    ball.vel[1] -= Gravity;
+	}
+	/*for (int i = 0; i < g.n; i++) {
+	  particle[i].pos[0] += particle[i].vel[0];
+	  particle[i].pos[1] += particle[i].vel[1];
+	  particle[i].vel[1] -= Gravity;
 	//check if particle went off screen
 	if (particle[i].pos[1] < 0.0 || particle[i].pos[0] > g.xres) {
-	    // optimizing this code below
-	    // particle[i] = particle [g.n-1];
-	    // g.n= g.n-1;
-	    // optimized
-	    particle[i] = particle [--g.n];
+	// optimizing this code below
+	// particle[i] = particle [g.n-1];
+	// g.n= g.n-1;
+	// optimized
+	particle[i] = particle [--g.n];
 	}
 	}
-*/
+	*/
 
 
 	//check for collision between particles and boxes
 	/*for (int j = 0; j < 5; j++) {
-	    if (particle[i].pos[1] < box[j].pos[1]+box[j].h && 
-		    particle[i].pos[0] > box[j].pos[0]-box[j].w &&
-		    particle[i].pos[0] < box[j].pos[0]+box[j].w &&
-		    particle[i].pos[1] > box[j].pos[1]-box[j].h)
-	    {
-		particle[i].vel[1] =  -particle[i].vel[1] * 0.3; 
-		particle[i].vel[0] += 0.01; 
+	  if (particle[i].pos[1] < box[j].pos[1]+box[j].h && 
+	  particle[i].pos[0] > box[j].pos[0]-box[j].w &&
+	  particle[i].pos[0] < box[j].pos[0]+box[j].w &&
+	  particle[i].pos[1] > box[j].pos[1]-box[j].h)
+	  {
+	  particle[i].vel[1] =  -particle[i].vel[1] * 0.3; 
+	  particle[i].vel[0] += 0.01; 
+	  }
+
+	  }
+	  */
+	int dist,xd,yd;
+	xd = ball.pos[0] - circle.c[0];
+	yd = ball.pos[1] - circle.c[1];
+	dist = sqrt((xd*xd)+(yd*yd));
+	if (dist <= circle.r) {
+	    if (ball.pos[0] < circle.c[0]) {
+		ball.vel[1] =  -ball.vel[1] * 0.03; 
+		ball.vel[0] = -dist * 0.02 ; 
+	    } else {
+		ball.vel[1] =  -ball.vel[1] * 0.03; 
+		ball.vel[0] = dist * 0.02 ; 
 	    }
 
 	}
-
-	int dist,xd,yd;
-	xd = particle[i].pos[0] - circle.c[0];
-	yd = particle[i].pos[1] - circle.c[1];
-	dist = sqrt((xd*xd)+(yd*yd));
-	if (dist <= circle.r) {
-	    if (particle[i].pos[0] < circle.c[0]) {
-		    particle[i].vel[1] =  -particle[i].vel[1] * 0.03; 
-		    particle[i].vel[0] = -dist * 0.02 ; 
-	    } else {
-		    particle[i].vel[1] =  -particle[i].vel[1] * 0.03; 
-		    particle[i].vel[0] = dist * 0.02 ; 
-	    }
-	
-    }*/
     }
 }
 void render()
 {
     //
     if (g.mainmenu == 0) {
-        prompt titlescreen[4];
-        Rect titleprompt[5];
-        glClear(GL_COLOR_BUFFER_BIT);
-        for (int i=0; i<4; i++) {
-            render_menu(titlescreen[i], titleprompt[i], i, g.xres, g.yres);
-        }
-        render_title(titleprompt[5],g.xres,g.yres);
-        return;
+	prompt titlescreen[4];
+	Rect titleprompt[5];
+	glClear(GL_COLOR_BUFFER_BIT);
+	for (int i=0; i<4; i++) {
+	    render_menu(titlescreen[i], titleprompt[i], i, g.xres, g.yres);
+	}
+	render_title(titleprompt[5],g.xres,g.yres);
+	return;
     }
 
-        Rect r[7];
-    
-    extern string waterfall[5];
-    string temp1[5] = {"Requirements", "Design", "Coding", "Testing", "Maintenance" }; 
-    string temp2[5] = {"Xander's", "Epic", "Minecraft", "Feature", "Mode"};
-    if (alex_feature == 0)
-	    stringtext(temp1);
-    else
-	    stringtext(temp2);
-    
 
-    char text[100];
+
+
     glClear(GL_COLOR_BUFFER_BIT);
-    
 
-    	// Draw Box	
-	Box highbox = Box(10.0f,325.0f, 550, 10, 0.0f, 0.0f);
-	glPushMatrix();
-	glColor3ub(255,100,255);
-	glTranslatef(highbox.pos[0], highbox.pos[1], 0.0f);
-	glBegin(GL_QUADS);
-	glVertex2f(-highbox.w, -highbox.h);
-	glVertex2f(-highbox.w,  highbox.h);
-	glVertex2f( highbox.w,  highbox.h);
-	glVertex2f( highbox.w, -highbox.h);
-	glEnd();
-	glPopMatrix();
-	
-	ball = Box(5.0f,5.0f, 570, 100, velocity[0], velocity[1]);
-	glPushMatrix();
-	glColor3ub(0,0,0);
-	glTranslatef(ball.pos[0], ball.pos[1], 0.0f);
-	glBegin(GL_QUADS);
-	glVertex2f(-ball.w, -ball.h);
-	glVertex2f(-ball.w,  ball.h);
-	glVertex2f( ball.w,  ball.h);
-	glVertex2f( ball.w, -ball.h);
-	glEnd();
-	glPopMatrix();
 
+    // Draw Box	
+    Box highbox = Box(10.0f,325.0f, 550, 10, 0.0f, 0.0f);
+    glPushMatrix();
+    glColor3ub(255,100,255);
+    glTranslatef(highbox.pos[0], highbox.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-highbox.w, -highbox.h);
+    glVertex2f(-highbox.w,  highbox.h);
+    glVertex2f( highbox.w,  highbox.h);
+    glVertex2f( highbox.w, -highbox.h);
+    glEnd();
+    glPopMatrix();
+
+    // Summon Ball	
+    //if (summonball) {
+    glPushMatrix();
+    glColor3ub(0,0,0);
+    glTranslatef(ball.pos[0], ball.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-ball.w, -ball.h);
+    glVertex2f(-ball.w,  ball.h);
+    glVertex2f( ball.w,  ball.h);
+    glVertex2f( ball.w, -ball.h);
+    glEnd();
+    glPopMatrix();
+    //	}
 
     //Draw particle.
     /*for (int i = 0; i < g.n; i++) {
-	glPushMatrix();
-	glColor3ub(150, 160, 255);
-	glTranslatef(particle[i].pos[0], particle[i].pos[1], 0.0f);
-	glBegin(GL_QUADS);
-	glVertex2f(-particle[i].w, -particle[i].h);
-	glVertex2f(-particle[i].w,  particle[i].h);
-	glVertex2f( particle[i].w,  particle[i].h);
-	glVertex2f( particle[i].w, -particle[i].h);
-	glEnd();
-	glPopMatrix();
-    
-    }
-    default_make_particle(); // default way of making particles. 
-    */
+      glPushMatrix();
+      glColor3ub(150, 160, 255);
+      glTranslatef(particle[i].pos[0], particle[i].pos[1], 0.0f);
+      glBegin(GL_QUADS);
+      glVertex2f(-particle[i].w, -particle[i].h);
+      glVertex2f(-particle[i].w,  particle[i].h);
+      glVertex2f( particle[i].w,  particle[i].h);
+      glVertex2f( particle[i].w, -particle[i].h);
+      glEnd();
+      glPopMatrix();
+
+      }
+      default_make_particle(); // default way of making particles. 
+      */
+    Triangle t1 = Triangle(float(g.xres),550.0f,float(g.xres),
+	    float(g.yres), float(g.yres), 300.0f);
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.5,0,0);
+    glVertex2f(t1.vertex1[0],t1.vertex1[1]);
+    glVertex2f(t1.vertex2[0],t1.vertex2[1]);
+    glVertex2f(t1.vertex3[0],t1.vertex3[1]);
+
+    glEnd();
+
+    Triangle t2 = Triangle(float(g.xres/2+110),400.0f,float(g.xres/2+110),
+	    25.0f, 10.0f, 10.0f);
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.5,0,0);
+    glVertex2f(t2.vertex1[0],t2.vertex1[1]);
+    glVertex2f(t2.vertex2[0],t2.vertex2[1]);
+    glVertex2f(t2.vertex3[0],t2.vertex3[1]);
+
+    glEnd();
+
+    Triangle t3 = Triangle(375.0f,float(g.xres/2+85),float(g.xres/2+85),
+	    25.0f, 10.0f, 25.0f);
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.5,0,0);
+    glVertex2f(t3.vertex1[0],t3.vertex1[1]);
+    glVertex2f(t3.vertex2[0],t3.vertex2[1]);
+    glVertex2f(t3.vertex3[0],t3.vertex3[1]);
+
+    glEnd();
+
 
     //Draw Circle
     int n = 20; 
@@ -475,11 +519,11 @@ void render()
 	angle += inc;
     }
     glEnd();
-	
+
     Circle halfcir = Circle(50.0f, 510 ,335, 0.0f, 0.0f);
-     n = 32; 
-     angle = 0.0;
-     inc = (2.0*3.14)/n;
+    n = 32; 
+    angle = 0.0;
+    inc = (2.0*3.14)/n;
     //glVertex2f(x, y);
     glColor3ub(255,100, 255);
     glBegin(GL_TRIANGLE_FAN);
@@ -491,17 +535,18 @@ void render()
     }
     glEnd();
 
+    Rect r[2];
     if (g.pause){
-	    r[6].bot = g.yres/1.5;
-	    r[6].left = g.xres/2;
-	    r[6].center = 0;
-	    ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
+	r[0].bot = g.yres/1.5;
+	r[0].left = g.xres/2;
+	r[0].center = 0;
+	ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
     }
 
-	r[7].bot = g.yres-35;
-	r[7].left = g.xres/2;
-	r[7].center = -5;
-	ggprint8b(&r[7], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
+    r[1].bot = g.yres-35;
+    r[1].left = g.xres/2;
+    r[1].center = -5;
+    ggprint8b(&r[7], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
 
 }
 
