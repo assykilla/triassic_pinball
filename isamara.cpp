@@ -71,11 +71,58 @@ void render_title(Rect t, int x, int y) {
 }
 
 unsigned int select_option(int x, int y) {
-    if (y <= 300+15 &&
-            x >= 90-80 &&
-            x <= 90+80 &&
-            y >= 300-15) {
+    prompt size;
+    if (y <= size.pos[1]+size.h &&
+            x >= size.pos[0]-size.w &&
+            x <= size.pos[0]+size.w &&
+            y >= size.pos[1]-size.h) {
         return 1;
-    }
-    return 0;
+    } else if (y <= size.pos[1]+size.h - 60 &&
+            x >= size.pos[0]-size.w &&
+            x <= size.pos[0]+size.w &&
+            y >= size.pos[1]-size.h - 60) {
+        return 2;
+    } else if (y <= size.pos[1]+size.h - 120 &&
+            x >= size.pos[0]-size.w &&
+            x <= size.pos[0]+size.w &&
+            y >= size.pos[1]-size.h - 120) {
+        return 3;
+    } else if (y <= size.pos[1]+size.h - 180 &&
+            x >= size.pos[0]-size.w &&
+            x <= size.pos[0]+size.w &&
+            y >= size.pos[1]-size.h - 180) {
+        return 4;
+    } else {return 0;}
 }
+
+void draw_button(int x, int y) {
+    int n = 20;
+    //circle.h will be used for the width
+    //drawing button to be pushed
+    prompt circle;
+    double angle = 0.0;
+    double inc = (2.0*3.14)/n;
+    //glVertex2f(x, y);
+    glColor3ub(100,200, 255);
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n; i++) {
+        circle.pos[0] = circle.h*cos(angle);
+        circle.pos[1] = circle.h*sin(angle);
+        glVertex2f(x/1.5+circle.pos[0],y/3 + circle.pos[1]);
+        angle += inc;
+    }
+    glEnd();
+}
+
+void push_button(float *velocity, int x, int y) {
+    // tries to launch ball similar to how pinball machines work
+    prompt circle;
+    if (y <= y/3 &&
+            x >= -1*circle.h-x/1.5 &&
+            x <= circle.h+x/1.5 &&
+            y >= -y/3) {
+        *velocity = 20.0f;
+    }
+    
+}
+

@@ -18,5 +18,7 @@ class prompt {
 extern void render_menu(prompt,Rect,int,int,int);
 extern void render_title(Rect t,int,int);
 extern unsigned int select_option(int,int);
+extern void draw_button(int, int);
+extern void push_button(float*, int, int);
 
 #endif
