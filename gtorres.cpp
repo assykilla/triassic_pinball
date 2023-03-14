@@ -1,12 +1,19 @@
 //George Torres
 
-void mirrorMode()
+void georgeFeature()
 {
+    ggprint8b(&r[6], 20, 0x0034a4eb, "George's Feature");
 
-    if (positionx >= 0) {
-        float positionx -= positionx - positionx;
+    if (XK_leftarrow) {
+        ball.wid -= .005;
     }
-    else {
-        float positionx += positionx + positionx;
+    if (XK_righarrow) {
+        ball.wid += .005;
+    }
+    if (XK_uparrow) {
+        ball.hgt += .005;
+    }
+    if (XK_uparrow) {
+        ball.hgt -= .005;
     }
 }

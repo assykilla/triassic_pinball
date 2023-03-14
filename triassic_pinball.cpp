@@ -19,6 +19,7 @@ using namespace std;
 #include "fonts.h"
 #include "abotello.h"
 #include "isamara.h"
+#include "gtorres.h"
 //some structures
 
 class Global {
@@ -37,6 +38,7 @@ class Global {
 	}
 } g;
 extern int alex_feature;
+int georgeFeatureToggle = 0;
 extern float velocity[2];
 extern void stringtext(string *text);
 class Box {
@@ -301,6 +303,9 @@ int X11_wrapper::check_keys(XEvent *e)
 		    else 
 			alex_feature = 0;
 		}
+		if (XK_G) {
+			georgeFeatureToggle - !georgeFeatureToggle;
+		}
 		break;
 	    case XK_space:
 		velocity[1] = 1.0f;
@@ -502,6 +507,10 @@ void render()
 	r[7].left = g.xres/2;
 	r[7].center = -5;
 	ggprint8b(&r[7], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
+
+	if (georgeFeatureToggle = 1) {
+		georgeFeature;
+	}
 
 }
 
